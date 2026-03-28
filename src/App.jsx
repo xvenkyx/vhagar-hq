@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const EC2_IP = '65.0.246.225'; // PUT YOUR ELASTIC IP HERE
 const LAMBDA_URL = 'https://64te6jvzb3ffxehmoun2z6tlha0fmyru.lambda-url.ap-south-1.on.aws';
 const BACKEND_URL = LAMBDA_URL;
-const RELAY_WS_URL = `ws://${EC2_IP}:3000`;
+const RELAY_WS_URL = 'wss://quadrangled-untenable-maximiliano.ngrok-free.dev';
 const INSTANCE_ID = 'i-0899ed741416cd5a5';
 
 // --- Shared Elements ---
