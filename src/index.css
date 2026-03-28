@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* Vhagar Core Colors */
+  --color-primary: #10a37f;
+  --color-primary-dark: #0d8a6a;
+  --color-background: #09090b;
+  --color-card: #111114;
+  --color-foreground: #fafafa;
+  --color-secondary: #27272a;
+  --color-muted: #71717a;
+  --color-border: #27272a;
+  
+  /* Layout Spacing */
+  --spacing-sidebar: 280px;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --primary: 161 84% 35%;
+    --primary-foreground: 0 0% 100%;
+    --card: 240 10% 4%;
+    --border: 240 5% 15%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Vhagar Minimalist Surface */
+  .vhagar-surface {
+    @apply bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+  }
+
+  .vhagar-glass {
+    @apply backdrop-blur-xl bg-[var(--color-background)] opacity-80 border-r border-[var(--color-border)];
+  }
+
+  /* Interactive Elements */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+  }
+
+  .nav-item-active {
+    @apply bg-[var(--color-primary)] opacity-10 text-[var(--color-primary)] border border-[var(--color-primary)] opacity-20 shadow-[0_0_20px_rgba(16,163,127,0.1)];
+  }
+
+  .nav-item-inactive {
+    @apply text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-white/5;
+  }
+
+  /* Buttons */
+  .vhagar-btn {
+    @apply px-4 py-2 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50;
+  }
+
+  .vhagar-btn-primary {
+    @apply bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] shadow-lg shadow-[var(--color-primary-0.2)];
+  }
+
+  .vhagar-btn-secondary {
+    @apply bg-[var(--color-secondary)] text-foreground hover:bg-muted/80 border border-border;
+  }
+
+  .vhagar-input {
+    @apply w-full bg-background border border-border rounded-xl p-4 text-sm focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted/50;
+  }
+}
