@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, MessageSquareText, Server, CreditCard, Radio, Github, Power, Activity, Terminal, Cloud, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // --- Constants ---
 // --- Constants ---
 const EC2_IP = '65.0.246.225'; // PUT YOUR ELASTIC IP HERE
-const LAMBDA_URL = 'https://64te6jvzb3ffxehmoun2z6tlha0fmyru.lambda-url.ap-south-1.on.aws';
+const LAMBDA_URL = 'https://a0g26vza5e.execute-api.ap-south-1.amazonaws.com';
 const BACKEND_URL = LAMBDA_URL;
 const RELAY_WS_URL = 'wss://quadrangled-untenable-maximiliano.ngrok-free.dev';
 const INSTANCE_ID = 'i-0e9399ec7cec42c81';
@@ -38,6 +38,17 @@ const CommandCenter = ({ isPaid }) => {
   const [text, setText] = useState('');
   const [wsStatus, setWsStatus] = useState('disconnected');
   const [socket, setSocket] = useState(null);
+  const [dgKey, setDgKey] = useState(localStorage.getItem('dg_key') || '');
+
+  // Voice Push-To-Talk State
+  const [audioStream, setAudioStream] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [sessionText, setSessionText] = useState('');
+  const [interimText, setInterimText] = useState('');
+  
+  const dgSocketRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const textRef = useRef({ session: '', interim: '' });
 
   useEffect(() => {
     const ws = new WebSocket(RELAY_WS_URL);
@@ -51,6 +62,109 @@ const CommandCenter = ({ isPaid }) => {
     setText(val);
     if (socket?.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ source: 'hq', text: val.replace(/\n/g, '<br>') }));
+    }
+  };
+
+  const connectAudioSource = async () => {
+    try {
+      if (!dgKey) { alert("Please enter your Deepgram API Key first!"); return; }
+      
+      // 1. Capture the Tab Audio
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const audioTrack = stream.getAudioTracks()[0];
+      
+      if (!audioTrack) { 
+        alert("CRITICAL: You MUST select 'Chrome Tab' and check 'Share Tab Audio'!"); 
+        stream.getTracks().forEach(t => t.stop()); 
+        return; 
+      }
+      
+      // Save it forever so we don't have to re-select 
+      setAudioStream(new MediaStream([audioTrack]));
+      
+      // Stop stream if user hits "Stop Sharing" on Chrome banner
+      audioTrack.onended = () => {
+        setAudioStream(null);
+        setIsListening(false);
+      };
+      
+    } catch (err) {
+      console.error(err);
+      if (err.name !== 'NotAllowedError') alert("Error connecting: " + err.message);
+    }
+  };
+
+  const toggleWalkieTalkie = () => {
+    if (!audioStream) return;
+    if (!dgKey) { alert("Deepgram API Key is missing!"); return; }
+
+    if (isListening) {
+      // --- STOP LISTENING & SEND ---
+      setIsListening(false);
+      
+      if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
+      if (dgSocketRef.current && dgSocketRef.current.readyState === WebSocket.OPEN) {
+        dgSocketRef.current.close();
+      }
+      
+      // Fire it to GPT
+      const finalText = `${textRef.current.session} ${textRef.current.interim}`.trim();
+      if (finalText && socket?.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'AUTO_TYPE_COMMAND', text: finalText }));
+      }
+      
+      // Clear UI
+      textRef.current = { session: '', interim: '' };
+      setTimeout(() => {
+        setSessionText('');
+        setInterimText('');
+      }, 500); // Tiny delay so user sees it empty AFTER sending
+      
+    } else {
+      // --- START LISTENING ---
+      setIsListening(true);
+      textRef.current = { session: '', interim: '' };
+      setSessionText('');
+      setInterimText('');
+      
+      const formats = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+      const supportedFormat = formats.find(f => MediaRecorder.isTypeSupported(f)) || '';
+      
+      // Connecting with interim results
+      const wsUrl = 'wss://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&interim_results=true&endpointing=500';
+      const dgSocket = new WebSocket(wsUrl, ['token', dgKey]);
+      dgSocketRef.current = dgSocket;
+      
+      dgSocket.onopen = () => {
+        const mediaRecorder = new MediaRecorder(audioStream, { mimeType: supportedFormat });
+        mediaRecorderRef.current = mediaRecorder;
+        
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0 && dgSocket.readyState === WebSocket.OPEN) dgSocket.send(event.data);
+        };
+        mediaRecorder.start(250);
+      };
+
+      dgSocket.onmessage = (message) => {
+        const received = JSON.parse(message.data);
+        const transcript = received.channel?.alternatives[0]?.transcript;
+        if (transcript) {
+          if (received.is_final) {
+            textRef.current.session += (textRef.current.session ? " " : "") + transcript;
+            textRef.current.interim = '';
+            setSessionText(textRef.current.session);
+            setInterimText('');
+          } else {
+            textRef.current.interim = transcript;
+            setInterimText(transcript);
+          }
+        }
+      };
+
+      dgSocket.onerror = (e) => {
+        console.error("Deepgram Error", e);
+        setIsListening(false);
+      };
     }
   };
 
@@ -72,9 +186,20 @@ const CommandCenter = ({ isPaid }) => {
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
         <h1 className="text-3xl font-black tracking-tight text-white mb-2">Command Center</h1>
-        <p className="text-muted text-sm flex items-center gap-2 font-medium">
-          Relay Active: <Badge status={wsStatus === 'connected' ? 'Running' : 'Stopped'}>{wsStatus}</Badge>
-        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <p className="text-muted text-sm flex items-center gap-2 font-medium">
+            Relay Active: <Badge status={wsStatus === 'connected' ? 'Running' : 'Stopped'}>{wsStatus}</Badge>
+          </p>
+          <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
+            <input 
+              type="password" 
+              placeholder="Deepgram API Key" 
+              value={dgKey} 
+              onChange={(e) => { setDgKey(e.target.value); localStorage.setItem('dg_key', e.target.value); }}
+              className="bg-transparent text-[10px] px-2 w-32 outline-none text-white/50 focus:outline-none"
+            />
+          </div>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -99,6 +224,37 @@ const CommandCenter = ({ isPaid }) => {
         </div>
 
         <div className="space-y-6">
+            <Card title="🎤 GPT Walkie-Talkie Mode">
+              <div className="space-y-4">
+                
+                {!audioStream ? (
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-3">
+                    <p className="text-xs text-white/60 leading-relaxed italic">
+                      Step 1: Connect your Google Meet tab's audio so the AI can listen.
+                    </p>
+                    <button onClick={connectAudioSource} className="w-full p-4 bg-primary/20 hover:bg-primary/40 text-primary uppercase font-black text-xs tracking-widest rounded-xl transition-all">
+                      🔌 Connect Audio Tab
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={toggleWalkieTalkie} className={`w-full p-6 text-sm font-black rounded-2xl uppercase tracking-widest transition-all ${isListening ? 'bg-rose-400 text-rose-950 animate-pulse shadow-lg shadow-rose-500/20' : 'bg-primary text-black hover:scale-105 shadow-xl shadow-primary/20'}`}>
+                    {isListening ? '🛑 Stop & Fire to GPT' : '🎙️ Tap to Listen'}
+                  </button>
+                )}
+
+                <div className="p-5 bg-black/40 rounded-xl border border-white/5 h-64 overflow-y-auto">
+                    {!audioStream ? (
+                        <p className="text-xs text-white/20 italic font-medium text-center mt-20">Awaiting audio source...</p>
+                    ) : (
+                      <p className="text-[13px] text-white/90 leading-relaxed font-mono">
+                        {sessionText} <span className="text-primary/70">{interimText}</span>
+                        {!sessionText && !interimText && <span className="text-white/30 italic">Press 'Tap to Listen' to begin...</span>}
+                      </p>
+                    )}
+                </div>
+              </div>
+            </Card>
+
            <Card title="Streaming Metadata">
              <div className="space-y-4">
                {[
@@ -131,6 +287,7 @@ const CommandCenter = ({ isPaid }) => {
 
 const Infrastructure = ({ isPaid }) => {
   const [status, setStatus] = useState('Checking...');
+  const [transcriptions, setTranscriptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchStatus = async () => {
@@ -162,6 +319,12 @@ const Infrastructure = ({ isPaid }) => {
     } finally { setLoading(false); }
   };
 
+  const handleAutoType = (textToType) => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'AUTO_TYPE_COMMAND', text: textToType }));
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
@@ -173,8 +336,10 @@ const Infrastructure = ({ isPaid }) => {
         <Card className={`lg:col-span-2 border-l-2 ${status === 'Running' ? 'border-l-primary' : 'border-l-rose-500'}`}>
            <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-xs font-black text-muted tracking-widest uppercase mb-1">PROD-RELAY-INSTANCE-01</h3>
-                <p className="text-3xl font-mono font-black tracking-tighter text-white">{EC2_IP}</p>
+                <h3 className="text-xs font-black text-muted tracking-widest uppercase mb-1">VHAGAR-SECURE-RELAY-V3</h3>
+                <p className="text-xl font-mono font-black tracking-tighter text-blue-400">
+                  quadrangled-untenable-maximiliano.ngrok-free.dev
+                </p>
               </div>
               <Badge status={status}>{status}</Badge>
            </div>
