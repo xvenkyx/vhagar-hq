@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, MessageSquareText, Server, CreditCard, Radio, Github, Power, Activity, Terminal, Cloud, ShieldCheck, Lock, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, MessageSquareText, Server, CreditCard, Radio, Github, Power, Activity, Terminal, Cloud, ShieldCheck, Lock, ChevronRight, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthScreen } from './Auth';
+import { UserManagement } from './UserManagement';
 
 // --- Constants ---
 export const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -346,7 +347,10 @@ const Infrastructure = ({ isPaid, isAdmin }) => {
   const fetchStatus = async () => {
     try {
       const resp = await fetch(`${BACKEND_URL}/status/${INSTANCE_ID}`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
+        headers: { 
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': `Bearer ${localStorage.getItem('vhagar_token')}`
+        }
       });
       const data = await resp.json();
       if (data.success) setStatus(data.status);
@@ -360,14 +364,15 @@ const Infrastructure = ({ isPaid, isAdmin }) => {
   }, []);
 
   const handleAction = async (action) => {
-    if (!isPaid) return alert('Purchase Required');
+    if (!isPaid && !isAdmin) return alert('Purchase Required');
     setLoading(true);
     try {
       const resp = await fetch(`${BACKEND_URL}/action`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': `Bearer ${localStorage.getItem('vhagar_token')}`
         },
         body: JSON.stringify({ action, instanceId: INSTANCE_ID })
       });
@@ -691,6 +696,7 @@ const App = () => {
   const navItems = [];
   if (isAdmin) {
       navItems.push({ icon: <LayoutDashboard size={18} />, label: 'COMMANDER', path: '/' });
+      navItems.push({ icon: <Users size={18} />, label: 'USERS', path: '/users' });
       navItems.push({ icon: <Server size={18} />, label: 'INFRASTRUCTURE', path: '/ec2' });
   } else {
       navItems.push({ icon: <LayoutDashboard size={18} />, label: 'PRODUCT HUB', path: '/' });
@@ -758,6 +764,7 @@ const App = () => {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={isAdmin ? <CommandCenter isPaid={isPaid} /> : <ProductHub isPaid={isPaid} isAdmin={isAdmin} />} />
+            {isAdmin && <Route path="/users" element={<UserManagement token={token} />} />}
             {isAdmin && <Route path="/ec2" element={<Infrastructure isPaid={isPaid} isAdmin={isAdmin} />} />}
             <Route path="/subs" element={<Subscriptions isPaid={isPaid} setIsPaid={handleSimulateUpgrade} />} />
           </Routes>
