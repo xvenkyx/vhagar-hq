@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Mail, Key, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const AuthScreen = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -110,8 +111,13 @@ export const AuthScreen = ({ onLogin }) => {
           </div>
         </form>
 
-        <div className="mt-8 flex items-center justify-center gap-2 text-[10px] text-white/20 uppercase font-black tracking-[0.2em]">
-           <ShieldCheck size={14} /> End-to-End Encrypted Handshake
+        <div className="mt-8 flex flex-col items-center justify-center gap-6">
+          <div className="flex items-center gap-2 text-[10px] text-white/20 uppercase font-black tracking-[0.2em]">
+             <ShieldCheck size={14} /> End-to-End Encrypted Handshake
+          </div>
+          <Link to="/" className="text-[10px] text-white/30 hover:text-primary uppercase font-black tracking-[0.2em] transition-colors border border-white/5 bg-white/5 py-2 px-4 rounded-full flex gap-2 items-center hover:border-primary/30">
+            ← Return to Public Terminal
+          </Link>
         </div>
       </motion.div>
     </div>

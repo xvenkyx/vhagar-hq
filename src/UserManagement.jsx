@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Trash2, ShieldCheck, CreditCard, RefreshCw, Search, MoreVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { API_URL } from './App';
+import { API_URL } from './config';
 
 const Card = ({ children, className = '', title }) => (
   <div className={`bg-card/40 border border-white/5 rounded-3xl p-6 backdrop-blur-xl transition-all hover:bg-white/5 hover:border-white/10 ${className}`}>
@@ -85,7 +85,7 @@ export const UserManagement = ({ token }) => {
           <p className="text-muted text-sm font-medium">Control operative access, manage subscriptions, and monitor devices.</p>
         </div>
         
-        <div className="relative group min-w-[300px]">
+        <div className="relative group w-full md:w-auto md:min-w-[300px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
           <input 
             type="text" 
