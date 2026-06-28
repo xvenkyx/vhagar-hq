@@ -37,6 +37,13 @@ export const Landing = () => {
   const navigate = useNavigate();
   const [init, setInit] = useState(false);
 
+  const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+  const downloadUrl = isMac
+    ? 'https://github.com/xvenkyx/vhagar-client/releases/download/v1.0.0/Vhagar.dmg'
+    : 'https://github.com/xvenkyx/vhagar-client/releases/download/v1.0.0/Vhagar.exe';
+  const downloadLabel = isMac ? 'Download for Mac' : 'Download for Windows';
+  const platformNote = isMac ? 'macOS · Requires license code' : 'Windows · Requires license code';
+
   useEffect(() => {
     initParticlesEngine(async (engine) => {
       await loadSlim(engine);
@@ -109,8 +116,7 @@ export const Landing = () => {
 
           {/* Download CTA */}
           <motion.a
-            href="/DocsDisplay.exe"
-            download
+            href={downloadUrl}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-primary text-black font-black uppercase tracking-[0.15em] text-sm shadow-[0_0_40px_rgba(16,163,127,0.35)] hover:shadow-[0_0_60px_rgba(16,163,127,0.5)] transition-shadow"
@@ -120,7 +126,7 @@ export const Landing = () => {
           </motion.a>
 
           <p className="mt-4 text-[11px] text-muted/60 uppercase tracking-widest font-bold">
-            Windows · Requires license code
+            {platformNote}
           </p>
         </motion.div>
       </main>
@@ -175,14 +181,13 @@ export const Landing = () => {
             Download the app, enter the license code you received, and you're live in under a minute.
           </p>
           <motion.a
-            href="/DocsDisplay.exe"
-            download
+            href={downloadUrl}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.15em] text-sm hover:bg-white/90 transition-colors"
           >
             <Download size={18} />
-            Download for Windows
+            {downloadLabel}
           </motion.a>
         </motion.div>
       </section>
