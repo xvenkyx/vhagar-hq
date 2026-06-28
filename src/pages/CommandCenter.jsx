@@ -128,7 +128,7 @@ export const CommandCenter = () => {
 
         {/* Generate Panel */}
         <div className="space-y-4">
-          <Card title="🔑 Issue New License">
+          <Card title="Issue New License">
             <form onSubmit={handleGenerate} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted font-black">Client Name</label>
@@ -177,7 +177,7 @@ export const CommandCenter = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                <Card title="✅ License Generated">
+                <Card title="License Generated">
                   <div className="space-y-4">
                     <div className="bg-black/40 border border-primary/20 rounded-2xl p-5 text-center">
                       <div className="text-2xl font-black tracking-[0.15em] text-primary font-mono mb-1">{newCode.code}</div>
@@ -199,7 +199,7 @@ export const CommandCenter = () => {
 
         {/* License Table */}
         <div className="lg:col-span-2">
-          <Card title="📋 All Licenses">
+          <Card title="All Licenses">
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs text-muted font-medium">{licenses.length} total</span>
               <button
