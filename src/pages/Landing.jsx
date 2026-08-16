@@ -7,8 +7,8 @@ export const Landing = () => {
 
   const isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
   const downloadUrl = isMac
-    ? 'https://github.com/xvenkyx/vhagar-client/releases/download/v1.0.0/Vhagar.dmg'
-    : 'https://github.com/xvenkyx/vhagar-client/releases/download/v1.0.0/Vhagar.exe';
+    ? 'https://github.com/xvenkyx/vhagar-client/releases/latest/download/Vhagar.dmg'
+    : 'https://github.com/xvenkyx/vhagar-client/releases/latest/download/Vhagar.exe';
   const downloadLabel = isMac ? 'Download for Mac' : 'Download for Windows';
   const platformNote = isMac ? 'macOS · Requires license code' : 'Windows · Requires license code';
 
