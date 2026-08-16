@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, User, Key, ShieldCheck, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { OCR_API } from './config';
 
@@ -14,17 +12,14 @@ export const AuthScreen = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const res = await fetch(`${OCR_API}/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId, password })
+        body: JSON.stringify({ adminId, password }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Authentication failed');
-
       onLogin(data.token, { adminId, name: data.name, role: 'admin' });
     } catch (err) {
       setError(err.message);
@@ -34,78 +29,54 @@ export const AuthScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b] text-white p-6 relative overflow-hidden">
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-[#09090b] text-white p-6">
+      <div className="w-full max-w-sm">
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md z-10"
-      >
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/5 border border-white/10 rounded-2xl mb-6 shadow-2xl">
-            <Lock className="text-primary" size={28} />
-          </div>
-          <h1 className="text-3xl font-black tracking-tighter mb-2 uppercase">Vhagar <span className="text-primary">Gate</span></h1>
-          <p className="text-xs uppercase tracking-widest text-white/40 font-bold">Admin Access Terminal</p>
+        <div className="text-center mb-8">
+          <h1 className="text-xl font-semibold mb-1">Vhagar</h1>
+          <p className="text-xs text-[#71717a]">Admin access</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 p-8 rounded-[32px] backdrop-blur-3xl shadow-2xl space-y-6">
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs p-4 rounded-xl font-bold uppercase tracking-widest text-center">
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <p className="text-rose-400 text-sm text-center">{error}</p>
+          )}
 
-          <div className="space-y-4">
-            <div className="relative group">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-              <input
-                type="text"
-                value={adminId}
-                onChange={(e) => setAdminId(e.target.value)}
-                required
-                placeholder="ADMIN ID"
-                autoComplete="off"
-                className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold tracking-widest outline-none focus:border-primary/50 focus:bg-white/5 text-white placeholder:text-white/20 transition-all uppercase"
-              />
-            </div>
+          <input
+            type="text"
+            value={adminId}
+            onChange={(e) => setAdminId(e.target.value)}
+            required
+            placeholder="Admin ID"
+            autoComplete="off"
+            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-[#71717a] transition-colors"
+          />
 
-            <div className="relative group">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="ACCESS PHRASE"
-                className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold tracking-widest outline-none focus:border-primary/50 focus:bg-white/5 text-white placeholder:text-white/20 transition-all uppercase"
-              />
-            </div>
-          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Password"
+            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-[#71717a] transition-colors"
+          />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-between bg-white text-black px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/90 active:scale-[0.98] transition-all group disabled:opacity-50"
+            className="w-full bg-white text-black py-3 rounded-lg text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50"
           >
-            <span>{loading ? 'Authenticating...' : 'Initialize Uplink'}</span>
-            <ChevronRight className="group-hover:translate-x-1 transition-transform" size={18} />
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-6">
-          <div className="flex items-center gap-2 text-[10px] text-white/20 uppercase font-black tracking-[0.2em]">
-             <ShieldCheck size={14} /> End-to-End Encrypted Handshake
-          </div>
-          <Link to="/" className="text-[10px] text-white/30 hover:text-primary uppercase font-black tracking-[0.2em] transition-colors border border-white/5 bg-white/5 py-2 px-4 rounded-full flex gap-2 items-center hover:border-primary/30">
-            ← Return to Public Terminal
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-xs text-[#71717a] hover:text-white transition-colors">
+            ← Back
           </Link>
         </div>
-      </motion.div>
+
+      </div>
     </div>
   );
 };

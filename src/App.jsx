@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 
 import { OCR_API } from './config';
 import { Landing } from './pages/Landing';
@@ -61,32 +60,30 @@ const App = () => {
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center font-black uppercase tracking-widest text-xs animate-pulse">
-        Establishing Secure Uplink...
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="w-4 h-4 border border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthScreen onLogin={handleLogin} />} />
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthScreen onLogin={handleLogin} />} />
 
-        {user && (
-          <Route
-            path="/dashboard"
-            element={
-              <Layout user={user} handleLogout={handleLogout}>
-                <CommandCenter />
-              </Layout>
-            }
-          />
-        )}
+      {user && (
+        <Route
+          path="/dashboard"
+          element={
+            <Layout user={user} handleLogout={handleLogout}>
+              <CommandCenter />
+            </Layout>
+          }
+        />
+      )}
 
-        <Route path="*" element={<Landing />} />
-      </Routes>
-    </AnimatePresence>
+      <Route path="*" element={<Landing />} />
+    </Routes>
   );
 };
 
