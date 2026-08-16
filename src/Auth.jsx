@@ -29,12 +29,12 @@ export const AuthScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b] text-white p-6">
+    <div className="min-h-screen flex items-center justify-center bg-background text-white p-6">
       <div className="w-full max-w-sm">
 
         <div className="text-center mb-8">
           <h1 className="text-xl font-semibold mb-1">Vhagar</h1>
-          <p className="text-xs text-[#71717a]">Admin access</p>
+          <p className="text-xs text-muted">Admin access</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -49,7 +49,7 @@ export const AuthScreen = ({ onLogin }) => {
             required
             placeholder="Admin ID"
             autoComplete="off"
-            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-[#71717a] transition-colors"
+            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-muted transition-colors"
           />
 
           <input
@@ -58,7 +58,7 @@ export const AuthScreen = ({ onLogin }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Password"
-            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-[#71717a] transition-colors"
+            className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm outline-none focus:border-white/30 text-white placeholder:text-muted transition-colors"
           />
 
           <button
@@ -71,7 +71,7 @@ export const AuthScreen = ({ onLogin }) => {
         </form>
 
         <div className="mt-6 text-center">
-          <Link to="/" className="text-xs text-[#71717a] hover:text-white transition-colors">
+          <Link to="/" className="text-xs text-muted hover:text-white transition-colors">
             ← Back
           </Link>
         </div>

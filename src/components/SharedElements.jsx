@@ -1,8 +1,8 @@
 import React from 'react';
 
 export const Card = ({ children, className = '', title }) => (
-  <div className={`bg-white/[0.03] border border-white/5 rounded-2xl p-5 ${className}`}>
-    {title && <h3 className="text-xs text-[#71717a] mb-4">{title}</h3>}
+  <div className={`bg-white/3 border border-white/5 rounded-2xl p-5 ${className}`}>
+    {title && <h3 className="text-xs text-muted mb-4">{title}</h3>}
     {children}
   </div>
 );

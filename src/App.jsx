@@ -60,7 +60,7 @@ const App = () => {
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-4 h-4 border border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );

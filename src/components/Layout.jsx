@@ -10,9 +10,9 @@ export const Layout = ({ user, handleLogout, children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col text-[#fafafa] bg-[#09090b]">
+    <div className="min-h-screen flex flex-col text-foreground bg-background">
 
-      <header className="fixed top-0 left-0 right-0 z-40 border-b border-white/5 bg-[#09090b]/90 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-40 border-b border-white/5 bg-background/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-8">
 
           <span className="text-sm font-semibold">Vhagar</span>
@@ -25,7 +25,7 @@ export const Layout = ({ user, handleLogout, children }) => {
                   key={path}
                   to={path}
                   className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs transition-colors ${
-                    active ? 'bg-white/10 text-white' : 'text-[#71717a] hover:text-white'
+                    active ? 'bg-white/10 text-white' : 'text-muted hover:text-white'
                   }`}
                 >
                   {icon}
@@ -36,10 +36,10 @@ export const Layout = ({ user, handleLogout, children }) => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-xs text-[#71717a]">{user?.name || user?.adminId || 'admin'}</span>
+            <span className="hidden sm:block text-xs text-muted">{user?.name || user?.adminId || 'admin'}</span>
             <button
               onClick={handleLogout}
-              className="text-xs text-[#71717a] hover:text-white transition-colors"
+              className="text-xs text-muted hover:text-white transition-colors"
             >
               Sign out
             </button>
