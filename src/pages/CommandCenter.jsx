@@ -21,7 +21,7 @@ export const CommandCenter = () => {
   const [loadingList, setLoadingList] = useState(true);
 
   const [clientName, setClientName] = useState('');
-  const [docUrl, setDocUrl] = useState('');
+  const docUrl = 'https://docs.google.com';
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState('');
   const [newCode, setNewCode] = useState(null);
@@ -50,7 +50,6 @@ export const CommandCenter = () => {
     e.preventDefault();
     setGenError('');
     if (!clientName.trim()) return setGenError('Client name required.');
-    if (!docUrl.startsWith('https://')) return setGenError('Enter a valid https:// URL.');
     setGenerating(true);
     setNewCode(null);
     try {
@@ -140,16 +139,6 @@ export const CommandCenter = () => {
                   className="w-full bg-black/40 border border-white/5 rounded-lg py-2.5 px-3 text-sm outline-none focus:border-white/20 text-white placeholder:text-muted transition-colors"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs text-muted">Content URL</label>
-                <input
-                  value={docUrl}
-                  onChange={e => setDocUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-black/40 border border-white/5 rounded-lg py-2.5 px-3 text-sm outline-none focus:border-white/20 text-white placeholder:text-muted transition-colors"
-                />
-              </div>
-
               {genError && (
                 <p className="text-rose-400 text-xs">{genError}</p>
               )}
